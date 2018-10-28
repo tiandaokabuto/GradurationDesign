@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.kabuto.ssm.mapper.OrdersMapper2">
+
+	<resultMap type="cn.kabuto.ssm.pojo.OrdersExtend" id="OrdersGoodsMap">
+		<id column="oid" property="oid" jdbcType="VARCHAR" />
+		<result column="otime" property="otime" jdbcType="TIMESTAMP" />
+		<result column="total" property="total" jdbcType="DECIMAL" />
+		<result column="state" property="state" jdbcType="SMALLINT" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="uid" property="uid" jdbcType="INTEGER" />
+		<result column="saleuid" property="saleuid" jdbcType="INTEGER" />
+		<collection property="orderitemExtendList" ofType="cn.kabuto.ssm.pojo.OrderitemExtend">
+			<result column="itemstate" property="itemstate" jdbcType="TINYINT" />
+			<result column="subtotal" property="subtotal" jdbcType="DECIMAL" />
+			<association property="goodsExtend" javaType="cn.kabuto.ssm.pojo.GoodsExtend">
+				<result column="newprice" property="newprice" jdbcType="DECIMAL" />
+				<result column="gname" property="gname" jdbcType="VARCHAR" />
+				<collection property="imgList" ofType="cn.kabuto.ssm.pojo.Img">
+					<result column="imgurl" property="imgurl" />
+				</collection>
+			</association>
+		</collection>
+	</resultMap>
+
+	<resultMap type="cn.kabuto.ssm.pojo.OrderitemExtend" id="ItemGoodsMap">
+		<id column="iid" property="iid" jdbcType="VARCHAR" />
+		<result column="subtotal" property="subtotal" jdbcType="DECIMAL" />
+		<result column="itemstate" property="itemstate" jdbcType="TINYINT" />
+		<association property="goodsExtend" javaType="cn.kabuto.ssm.pojo.GoodsExtend">
+			<result column="gid" property="gid" jdbcType="INTEGER" />
+			<result column="uid" property="uid" jdbcType="INTEGER" />
+			<collection property="imgList" ofType="cn.kabuto.ssm.pojo.Img">
+				<result column="imgurl" property="imgurl" />
+			</collection>
+		</association>
+	</resultMap>
+
+
+	<select id="selectBuyOrdersByUid" resultMap="OrdersGoodsMap">
+		SELECT
+		orders.*,
+		orderitem.subtotal,
+		orderitem.itemstate,
+		goods.gname,
+		goods.newprice,
+		img.imgurl
+		FROM
+		orders,orderitem,goods,img
+		WHERE
+		orders.oid=orderitem.oid
+		AND orderitem.gid=goods.gid
+		AND goods.gid=img.gid
+		AND orders.uid=#{uid}
+	</select>
+
+	<select id="selectSaleOrdersBySaleuid" resultMap="OrdersGoodsMap">
+		SELECT
+		orders.*,
+		orderitem.subtotal,
+		orderitem.itemstate,
+		goods.gname,
+		goods.newprice,
+		img.imgurl
+		FROM
+		orders,orderitem,goods,img,user
+		WHERE
+		orders.oid=orderitem.oid
+		AND orderitem.gid=goods.gid
+		AND
+		goods.gid=img.gid
+		AND goods.uid=user.uid
+		AND goods.uid=#{uid}
+	</select>
+
+	<select id="selectOrderitemByUidOid" resultType="cn.kabuto.ssm.pojo.Orderitem">
+		SELECT
+		orderitem.*
+		from
+		orderitem,goods,`user`
+		WHERE orderitem.gid=goods.gid AND
+		goods.uid=`user`.uid
+		AND goods.uid=#{uid}
+		AND orderitem.oid=#{oid}
+	</select>
+
+	<select id="findAllOrders" resultMap="OrdersGoodsMap">
+		SELECT
+		orders.*,
+		goods.gname
+		FROM
+		orders,orderitem,goods
+		WHERE orders.oid=orderitem.oid AND
+		orderitem.gid=goods.gid
+	</select>
+
+	<select id="findItemByOid" resultMap="ItemGoodsMap">
+		SELECT
+		orderitem.*,goods.gid,goods.uid,img.imgurl
+		FROM
+		orderitem,goods,img
+		WHERE
+		orderitem.gid=goods.gid AND goods.gid=img.gid AND orderitem.oid=#{oid}
+	</select>
+</mapper>

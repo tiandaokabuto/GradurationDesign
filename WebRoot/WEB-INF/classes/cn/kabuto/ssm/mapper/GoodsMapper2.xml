@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.kabuto.ssm.mapper.GoodsMapper2" >
+<resultMap type="cn.kabuto.ssm.pojo.GoodsExtend" id="GoodsImgMap">
+	<id column="gid" property="gid" jdbcType="INTEGER" />
+    <result column="gname" property="gname" jdbcType="VARCHAR" />
+    <result column="newprice" property="newprice" jdbcType="DECIMAL" />
+    <result column="oldprice" property="oldprice" jdbcType="DECIMAL" />
+    <result column="gdescription" property="gdescription" jdbcType="VARCHAR" />
+    <result column="state" property="state" jdbcType="TINYINT" />
+    <result column="uid" property="uid" jdbcType="INTEGER" />
+    <result column="cid" property="cid" jdbcType="INTEGER" />
+    <result column="starttime" property="starttime" jdbcType="TIMESTAMP" />
+    <result column="endtime" property="endtime" jdbcType="TIMESTAMP" />
+    <result column="flashtime" property="flashtime" jdbcType="TIMESTAMP" />
+    <result column="salestate" property="salestate" jdbcType="TINYINT" />
+    <result column="buytime" property="buytime" jdbcType="TIMESTAMP" />
+    <result column="uploadstate" property="uploadstate" jdbcType="TINYINT" />
+    <result column="gcondition" property="gcondition" jdbcType="VARCHAR" />
+    <result column="salereason" property="salereason" jdbcType="VARCHAR" />
+    <result column="buyway" property="buyway" jdbcType="VARCHAR" />
+    <collection property="imgList" ofType="cn.kabuto.ssm.pojo.Img">
+    	<id column="imgid" property="imgid"/>
+    	<result column="imgurl" property="imgurl"/>
+    </collection>
+</resultMap>
+<!-- 按分类查询 ,按时间排序,有图片-->
+<select id="selectByCidOrderByTime" resultMap="GoodsImgMap">
+	select
+	goods.*,img.imgid,img.imgurl
+	from
+	goods,img
+	where
+	goods.gid=img.gid and cid=#{cid} and state=1 and salestate=1 and uploadstate=1
+	order by flashtime DESC
+</select>
+
+<!-- 按分类查询 ,按时间排序,无图片-->
+<select id="selectByCid" resultType="cn.kabuto.ssm.pojo.Goods">
+	select * from goods
+	where cid = #{cid,jdbcType=INTEGER} and state=1 and salestate=1 and uploadstate=1
+	order by flashtime DESC
+</select>
+<!-- 查询全部,按时间排序 -->
+<select id="selectAllOrderByTime" resultMap="GoodsImgMap">
+	select
+	goods.*,img.imgid,img.imgurl
+	from
+	goods,img
+	where 
+	state = 1 and salestate=1 and goods.gid=img.gid and uploadstate=1
+	order by flashtime DESC
+	
+</select>
+<!-- 按商品名模糊查询,按时间排序 -->
+<select id="selectByGname" resultMap="GoodsImgMap">
+	select 
+	goods.*,img.imgid,img.imgurl
+	from 
+	goods , img
+	where gname like '%${value}%' and state = 1 and goods.gid=img.gid and salestate=1 and uploadstate=1
+	order by flashtime DESC
+</select>
+<!-- 按商品id查询 -->
+<select id="selectByGid" resultMap="GoodsImgMap">
+	select
+	goods.*,img.imgid,img.imgurl
+	from
+	goods,img
+	where
+	goods.gid=img.gid  and goods.gid=#{gid}	
+</select>
+<!-- 按用户id查找商品,按时间排序 -->
+<select id="findGoodsByUid" resultMap="GoodsImgMap">
+	select
+	goods.*,img.imgid,img.imgurl
+	from
+	goods,img
+	where
+	goods.gid=img.gid and state=1 and uid=#{uid} 
+	order by flashtime DESC
+</select>
+<!-- 查找全部的商品 -->
+<select id="findAllGoods" resultMap="GoodsImgMap">
+	select
+	goods.*,img.imgid,img.imgurl
+	from
+	goods,img
+	where 
+	goods.gid=img.gid
+</select>
+</mapper>
